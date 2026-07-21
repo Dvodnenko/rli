@@ -31,12 +31,12 @@ class Agent:
         self.N[arm] += 1
         self.Qs[arm] += 1/self.N[arm] * (reward - self.Qs[arm])
 
-    def step(self) -> float:
+    def step(self) -> tuple[int, float]:
         """Agent's whole action-reward cycle"""
         action = self.select_action()
         reward = self.bandit.pull(action)
         self.update(action, reward)
-        return reward
+        return action, reward
 
 
 def run(n_steps: int, n: int, epsilon: float):
@@ -44,26 +44,46 @@ def run(n_steps: int, n: int, epsilon: float):
     Qs = np.zeros(n)
     N = np.zeros(n)
     rewards = np.zeros(n_steps)
+    optimal_actions = np.zeros(n_steps)
+    optimal_action = qs.argmax()
 
     bandit = Bandit(n, qs)
     agent = Agent(bandit, Qs, N, epsilon)
 
     for s in range(n_steps):
-        rewards[s] = agent.step()
-    return rewards
+        step = agent.step()
+        rewards[s] = step[1] # step[1] is the reward
+        if step[0] == optimal_action: # step[0] is the action taken
+            optimal_actions[s] += 1
+    return rewards, optimal_actions
 
 
 def experiment(n_runs=2000, n_steps=1000, n: int= 10, epsilon: float = 0):
     all_rewards = np.zeros((n_runs, n_steps))
+    optimal_actions = np.zeros((n_runs, n_steps))
     
     for r in range(n_runs):
-        all_rewards[r] = run(n_steps, n, epsilon)
+        all_rewards[r], optimal_actions[r] = run(n_steps, n, epsilon)
     
     avg_rewards = all_rewards.mean(axis=0)  # average across runs, per timestep
-    return avg_rewards
+    return avg_rewards, optimal_actions.mean(axis=0) * 100
 
 
-plt.plot(experiment(n=10, epsilon=0.001))
-plt.xlabel("Steps")
-plt.ylabel("Average reward")
+exp = experiment(n=10, epsilon=0.1)
+# print(exp[0].shape, exp[1].shape)
+# plt.subplot
+# plt.xlabel("Steps")
+# plt.ylabel("Average reward")
+# plt.show()
+
+fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(10, 8))
+
+ax1.plot(exp[0])
+ax1.set_ylabel("Average reward")
+
+ax2.plot(exp[1])
+ax2.set_ylabel("% Optimal action")
+ax2.set_xlabel("Steps")
+
+plt.tight_layout()
 plt.show()
