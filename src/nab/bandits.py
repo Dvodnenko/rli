@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 @dataclass(frozen=True)
-class Bandit:
+class StationaryBandit:
     n: int # n of arms
     qs: np.ndarray # actual values of arms
 
@@ -16,7 +16,7 @@ class Bandit:
 
 @dataclass
 class Agent:
-    bandit: Bandit
+    bandit: StationaryBandit
     Qs: np.ndarray
     N: np.ndarray
     epsilon: float = 0 # greedy by default
@@ -47,7 +47,7 @@ def run(n_steps: int, n: int, epsilon: float):
     optimal_actions = np.zeros(n_steps)
     optimal_action = qs.argmax()
 
-    bandit = Bandit(n, qs)
+    bandit = StationaryBandit(n, qs)
     agent = Agent(bandit, Qs, N, epsilon)
 
     for s in range(n_steps):
