@@ -5,25 +5,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-@dataclass(frozen=True)
-class StationaryBandit:
-    n: int # n of arms
-    qs: np.ndarray # actual values of arms
+@dataclass
+class Bandit:
+    n: int
+    qs: np.ndarray
+    drift_std: float = 0  # how much each arm's value wobbles per step
 
     def pull(self, arm: int) -> float:
-        return np.random.normal(self.qs[arm], 1)
+        value = np.random.normal(self.qs[arm], 1)
+        self.qs += np.random.normal(0, self.drift_std, size=self.n)  # random walk, every step
+        return value
 
 
 @dataclass
 class Agent:
-    bandit: StationaryBandit
+    bandit: Bandit
     Qs: np.ndarray
     N: np.ndarray
     epsilon: float = 0 # greedy by default
 
     def select_action(self):
         """return index of a greedy action or an exploratory action"""
-        if random.random() <= self.epsilon:
+        if random.random() < self.epsilon:
             return random.randint(0, self.bandit.n-1) # random action
         return self.Qs.argmax() # greedy action
 
@@ -39,7 +42,7 @@ class Agent:
         return action, reward
 
 
-def run(n_steps: int, n: int, epsilon: float):
+def run(n_steps: int, n: int, epsilon: float, drift_std: float = 0):
     qs = np.random.normal(0, 1, size=n)
     Qs = np.zeros(n)
     N = np.zeros(n)
@@ -47,7 +50,7 @@ def run(n_steps: int, n: int, epsilon: float):
     optimal_actions = np.zeros(n_steps)
     optimal_action = qs.argmax()
 
-    bandit = StationaryBandit(n, qs)
+    bandit = Bandit(n, qs, drift_std)
     agent = Agent(bandit, Qs, N, epsilon)
 
     for s in range(n_steps):
@@ -58,20 +61,20 @@ def run(n_steps: int, n: int, epsilon: float):
     return rewards, optimal_actions
 
 
-def experiment(n_runs=2000, n_steps=1000, n: int= 10, epsilon: float = 0):
+def experiment(n_runs=2000, n_steps=1000, n: int= 10, epsilon: float = 0, drift_std: float = 0):
     all_rewards = np.zeros((n_runs, n_steps))
     optimal_actions = np.zeros((n_runs, n_steps))
     
     for r in range(n_runs):
-        all_rewards[r], optimal_actions[r] = run(n_steps, n, epsilon)
+        all_rewards[r], optimal_actions[r] = run(n_steps, n, epsilon, drift_std)
     
     avg_rewards = all_rewards.mean(axis=0)  # average across runs, per timestep
     return avg_rewards, optimal_actions.mean(axis=0) * 100
 
 
-curve_1 = experiment(n=10, epsilon=0.1)
-curve_2 = experiment(n=10, epsilon=0.01)
-curve_3 = experiment(n=10, epsilon=0)
+curve_1 = experiment(n=10, epsilon=0.1, drift_std=0.1)
+curve_2 = experiment(n=10, epsilon=0.01, drift_std=0.1)
+curve_3 = experiment(n=10, epsilon=0, drift_std=0.1)
 
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(10, 8))
 
