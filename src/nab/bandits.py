@@ -48,7 +48,6 @@ def run(n_steps: int, n: int, epsilon: float, drift_std: float = 0):
     N = np.zeros(n)
     rewards = np.zeros(n_steps)
     optimal_actions = np.zeros(n_steps)
-    optimal_action = qs.argmax()
 
     bandit = Bandit(n, qs, drift_std)
     agent = Agent(bandit, Qs, N, epsilon)
@@ -56,7 +55,7 @@ def run(n_steps: int, n: int, epsilon: float, drift_std: float = 0):
     for s in range(n_steps):
         step = agent.step()
         rewards[s] = step[1] # step[1] is the reward
-        if step[0] == optimal_action: # step[0] is the action taken
+        if step[0] == qs.argmax(): # step[0] is the action taken
             optimal_actions[s] += 1
     return rewards, optimal_actions
 
