@@ -69,19 +69,20 @@ def experiment(n_runs=2000, n_steps=1000, n: int= 10, epsilon: float = 0):
     return avg_rewards, optimal_actions.mean(axis=0) * 100
 
 
-exp = experiment(n=10, epsilon=0.1)
-# print(exp[0].shape, exp[1].shape)
-# plt.subplot
-# plt.xlabel("Steps")
-# plt.ylabel("Average reward")
-# plt.show()
+curve_1 = experiment(n=10, epsilon=0.1)
+curve_2 = experiment(n=10, epsilon=0.01)
+curve_3 = experiment(n=10, epsilon=0)
 
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(10, 8))
 
-ax1.plot(exp[0])
+ax1.plot(curve_1[0], color="black")
+ax1.plot(curve_2[0], color="red")
+ax1.plot(curve_3[0], color="green")
 ax1.set_ylabel("Average reward")
 
-ax2.plot(exp[1])
+ax2.plot(curve_1[1], color="black")
+ax2.plot(curve_2[1], color="red")
+ax2.plot(curve_3[1], color="green")
 ax2.set_ylabel("% Optimal action")
 ax2.set_xlabel("Steps")
 
