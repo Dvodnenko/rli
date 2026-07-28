@@ -22,8 +22,8 @@ class Agent:
     bandit: Bandit
     Qs: np.ndarray
     N: np.ndarray
+    alpha: float | None = None # step-size
     epsilon: float = 0 # greedy by default
-    alpha: float = 0.1 # step-size
 
     def select_action(self):
         """return index of a greedy action or an exploratory action"""
@@ -34,7 +34,8 @@ class Agent:
     def update(self, arm: int, reward: float):
         self.N[arm] += 1
         # self.Qs[arm] += 1/self.N[arm] * (reward - self.Qs[arm])
-        self.Qs[arm] += self.alpha * (reward - self.Qs[arm])
+        step_size = self.alpha if self.alpha is not None else 1/self.N[arm]
+        self.Qs[arm] += step_size * (reward - self.Qs[arm])
 
     def step(self) -> tuple[int, float]:
         """Agent's whole action-reward cycle"""
@@ -81,7 +82,7 @@ def experiment(
     return avg_rewards, optimal_actions.mean(axis=0) * 100
 
 
-curve_1 = experiment(n=10, epsilon=0.1, drift_std=0.1, alpha=0.5)
+curve_1 = experiment(n=10, epsilon=0.1, drift_std=0.1)
 curve_2 = experiment(n=10, epsilon=0.01, drift_std=0.1, alpha=0.5)
 curve_3 = experiment(n=10, epsilon=0, drift_std=0.1, alpha=0.5)
 
