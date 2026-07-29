@@ -48,10 +48,10 @@ class Agent:
 def run(
     n_steps: int,
     n: int, drift_std: float = 0,
-    epsilon: float = 0, alpha: float = 0.1
+    epsilon: float = 0, alpha: float = None, optimistic: bool = False
 ):
     qs = np.random.normal(0, 1, size=n)
-    Qs = np.zeros(n)
+    Qs = np.zeros(n) + 5 if optimistic else np.zeros(n)
     N = np.zeros(n)
     rewards = np.zeros(n_steps)
     optimal_actions = np.zeros(n_steps)
@@ -70,32 +70,32 @@ def run(
 def experiment(
     n_runs=2000, n_steps=1000,
     n: int = 10, drift_std: float = 0,
-    epsilon: float = 0, alpha: float = 0.1
+    epsilon: float = 0, alpha: float = None, optimistic: bool = False
 ):
     all_rewards = np.zeros((n_runs, n_steps))
     optimal_actions = np.zeros((n_runs, n_steps))
     
     for r in range(n_runs):
-        all_rewards[r], optimal_actions[r] = run(n_steps, n, drift_std, epsilon, alpha)
+        all_rewards[r], optimal_actions[r] = run(
+            n_steps, n, drift_std, 
+            epsilon, alpha, optimistic
+        )
     
     avg_rewards = all_rewards.mean(axis=0)  # average across runs, per timestep
     return avg_rewards, optimal_actions.mean(axis=0) * 100
 
 
-curve_1 = experiment(n=10, epsilon=0.1, drift_std=0.1)
-curve_2 = experiment(n=10, epsilon=0.01, drift_std=0.1, alpha=0.5)
-curve_3 = experiment(n=10, epsilon=0, drift_std=0.1, alpha=0.5)
+curve_1 = experiment(n=10, epsilon=0, alpha=0.1, optimistic=True)
+curve_2 = experiment(n=10, epsilon=0.1, alpha=0.1)
 
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(10, 8))
 
 ax1.plot(curve_1[0], color="black")
 ax1.plot(curve_2[0], color="red")
-ax1.plot(curve_3[0], color="green")
 ax1.set_ylabel("Average reward")
 
 ax2.plot(curve_1[1], color="black")
 ax2.plot(curve_2[1], color="red")
-ax2.plot(curve_3[1], color="green")
 ax2.set_ylabel("% Optimal action")
 ax2.set_xlabel("Steps")
 
