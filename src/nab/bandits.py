@@ -22,8 +22,8 @@ class Agent:
     bandit: Bandit
     Qs: np.ndarray
     N: np.ndarray
-    alpha: float | None = None # step-size
     epsilon: float = 0 # greedy by default
+    alpha: float | None = None # step-size
 
     def select_action(self):
         """return index of a greedy action or an exploratory action"""
