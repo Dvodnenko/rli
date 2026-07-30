@@ -10,7 +10,7 @@ chosen from a probability distribution. The task is to **maximize the expected r
 * $Q_t(a)$ - the estimated value of action $a$
 * $ε$ - probability of exploring new actions instead of exploiting known ones
 * *greedy action* - an action that has the highest value at a given timestep
-* *$ε$-greedy method* - a method that selects greedy actions with some probability $ε$
+* *ε-greedy method* - a method that selects greedy actions with some probability $ε$
 * *greedy method* - a method that **always** selects greedy actions (note that greedy method is an $ε$-greedy method with $ε$=0)
 
 #### How it works
@@ -37,3 +37,7 @@ As it gets more information, it starts to exploit known actions that give the bi
 
 An *experiment* is a sequence of runs. Its purpose is to find the average reward over lots of runs (in my case, 2000). It stores the reward for each step in each run, and then finds the average reward for $n$ th step in all
 runs. The resulting plot's x axis is "# of step", y axis - "take rewards for this $n$ th step from all runs, then average them".
+
+#### More details
+"Non-stationary problem" means that the actual values of each arm ($q(a)$ values) drift every step, instead of being static. It means that an action that was the best in the beginning can become worse,
+or even the worst one. 
