@@ -41,3 +41,7 @@ runs. The resulting plot's x axis is "# of step", y axis - "take rewards for thi
 #### More details
 "Non-stationary problem" means that the actual values of each arm ($q(a)$ values) drift every step, instead of being static. It means that an action that was the best in the beginning can become worse,
 or even the worst one. 
+
+"Optimistic initial values" means that you overestimate all the actions in the beginning on purpose.
+For example, your actual values are drawn from normal distribution with mean 0 and variance 1. But instead of estimating them to be equalling 0, you estimate them to equal 5. Getting 5 from $N(0, 1)$ is possible, but extremely rare.
+It's often useful to force your agent to explore in the beginning, then exploit. It is typically paired with greedy approaches.
