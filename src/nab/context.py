@@ -4,17 +4,22 @@ from enum import Enum
 
 class ASMethodKind(Enum):
     EPSILON = "epsilon" # greedy and epsilon-greedy
+    UCB = "ucb" # upper-confidence-bound
 
 @dataclass(kw_only=True)
 class ASMethod:
     """Action Selection Method"""
     kind: ASMethodKind
     epsilon: float = None
+    c: float = None
 
     def __post_init__(self):
         if self.kind == ASMethodKind.EPSILON:
             if not (0 <= self.epsilon <= 1):
                 raise ValueError("Epsilon must be in range [0, 1]")
+        else:
+            if self.c <= 0:
+                raise ValueError("C must be > 0")
 
 
 @dataclass(frozen=True, kw_only=True)

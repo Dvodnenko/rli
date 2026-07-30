@@ -29,11 +29,21 @@ class Agent:
     def select_action(self):
         if self.asmethod.kind == ASMethodKind.EPSILON:
             return self._select_action_epsilon()
+        else:
+            return self._select_action_ucb()
 
     def _select_action_epsilon(self):
         if random.random() < self.asmethod.epsilon:
             return random.randint(0, self.bandit.n-1) # random action
         return self.Qs.argmax() # greedy action
+
+    def _select_action_ucb(self):
+        """select action with UCB1 formula"""
+        t = self.N.sum() + 1
+        with np.errstate(divide='ignore'):
+            ucb_values = self.Qs + self.asmethod.c * np.sqrt(np.log(t) / self.N)
+        ucb_values[self.N == 0] = np.inf
+        return np.argmax(ucb_values)
 
     def update(self, arm: int, reward: float):
         self.N[arm] += 1
