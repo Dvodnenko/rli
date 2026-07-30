@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .context import ExperimentContext
+from .context import ExperimentContext, ASMethod, ASMethodKind
 
 
 @dataclass
@@ -23,12 +23,15 @@ class Agent:
     bandit: Bandit
     Qs: np.ndarray
     N: np.ndarray
-    epsilon: float = 0 # greedy by default
+    asmethod: ASMethod
     alpha: float | None = None # step-size
 
     def select_action(self):
-        """return index of a greedy action or an exploratory action"""
-        if random.random() < self.epsilon:
+        if self.asmethod.kind == ASMethodKind.EPSILON:
+            return self._select_action_epsilon()
+
+    def _select_action_epsilon(self):
+        if random.random() < self.asmethod.epsilon:
             return random.randint(0, self.bandit.n-1) # random action
         return self.Qs.argmax() # greedy action
 
@@ -54,7 +57,7 @@ def run(ctx: ExperimentContext):
     optimal_actions = np.zeros(ctx.n_steps)
 
     bandit = Bandit(ctx.n_arms, qs, ctx.drift_std)
-    agent = Agent(bandit, Qs, N, ctx.epsilon, ctx.alpha)
+    agent = Agent(bandit, Qs, N, ctx.asmethod, ctx.alpha)
 
     for s in range(ctx.n_steps):
         step = agent.step()
