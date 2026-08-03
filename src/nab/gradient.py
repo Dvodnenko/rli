@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from .context import ExperimentContext
+
 
 @dataclass
 class Bandit:
@@ -55,3 +57,30 @@ class Agent:
         reward = self.bandit.pull(action)
         self.update(action, reward)
         return action, reward
+
+
+def run(ctx: ExperimentContext):
+    actual_values = np.random.normal(0, 1, size=ctx.n_arms)
+    preferences = np.zeros(ctx.n_arms)
+    rewards = np.zeros(ctx.n_steps)
+    optimal_actions = np.zeros(ctx.n_steps)
+
+    bandit = Bandit(ctx.n_arms, actual_values, ctx.drift_std)
+    agent = Agent(bandit, preferences, ctx.alpha, rewards)
+
+    for s in range(ctx.n_steps):
+        step = agent.step()
+        rewards[s] = step[1] # step[1] is the reward
+        if step[0] == actual_values.argmax(): # step[0] is the action taken
+            optimal_actions[s] += 1
+    return rewards, optimal_actions
+
+def experiment(ctx: ExperimentContext):
+    all_rewards = np.zeros((ctx.n_runs, ctx.n_steps))
+    optimal_actions = np.zeros((ctx.n_runs, ctx.n_steps))
+    
+    for r in range(ctx.n_runs):
+        all_rewards[r], optimal_actions[r] = run(ctx)
+    
+    avg_rewards = all_rewards.mean(axis=0)  # average across runs, per timestep
+    return avg_rewards, optimal_actions.mean(axis=0) * 100
