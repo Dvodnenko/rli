@@ -30,7 +30,12 @@ class Agent:
         return pi_t_a
 
     def select_action(self):
-        ...
+        point = random.uniform(0, 1)
+        cumulative = 0.0
+        for a in range(self.bandit.n):
+            cumulative += self.pi_t(a)
+            if point <= cumulative:
+                return a
 
     def update(self, action: int, reward: float):
         a = self.alpha
