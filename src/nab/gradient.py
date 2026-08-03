@@ -24,6 +24,14 @@ class Agent:
     preferences: np.ndarray
     alpha: float
     rewards: np.ndarray
+    mean_baseline: bool = True
+    constant_baseline: float = None # only if mean_baseline is False
+
+    @property
+    def baseline(self):
+        if self.mean_baseline:
+            return self.rewards.mean()
+        return self.constant_baseline
 
     def pi_t(self, a: int):
         """π_t(a) - the probability of picking action a"""
@@ -42,7 +50,7 @@ class Agent:
     def update(self, action: int, reward: float):
         a = self.alpha
         Rt = reward
-        Rt_bar = self.rewards.mean()
+        Rt_bar = self.baseline
         pi_t_A = self.pi_t(action)
 
         self.preferences[action] += a*(Rt - Rt_bar)*(1 - pi_t_A)
@@ -66,7 +74,8 @@ def run(ctx: ExperimentContext):
     optimal_actions = np.zeros(ctx.n_steps)
 
     bandit = Bandit(ctx.n_arms, actual_values, ctx.drift_std)
-    agent = Agent(bandit, preferences, ctx.alpha, rewards)
+    agent = Agent(bandit, preferences, ctx.alpha, rewards, 
+                  ctx.mean_baseline, ctx.constant_baseline)
 
     for s in range(ctx.n_steps):
         step = agent.step()

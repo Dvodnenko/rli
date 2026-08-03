@@ -35,6 +35,9 @@ class ExperimentContext:
     alpha: float | None = None # constant step-size parameter
     optimism: float = 0 # regulates initial optimism; realistic by default
 
+    mean_baseline: bool = True # whether baseline = rewards.mean()
+    constant_baseline: float = None # if mean_baseline is False
+
     def __post_init__(self):
         """Validation of parameters"""
         if min(self.n_runs, self.n_steps, self.n_arms) <= 0:
