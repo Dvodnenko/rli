@@ -48,3 +48,10 @@ class Agent:
         for action_ in range(self.bandit.n):
             if action_ != action:
                 self.preferences[action_] -= a*(Rt - Rt_bar)*self.pi_t(action_)
+
+    def step(self):
+        """Agent's whole action-reward cycle"""
+        action = self.select_action()
+        reward = self.bandit.pull(action)
+        self.update(action, reward)
+        return action, reward
