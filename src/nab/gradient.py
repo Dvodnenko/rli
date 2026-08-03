@@ -26,11 +26,12 @@ class Agent:
     rewards: np.ndarray
     mean_baseline: bool = True
     constant_baseline: float = None # only if mean_baseline is False
+    _step: int = 1
 
     @property
     def baseline(self):
         if self.mean_baseline:
-            return self.rewards.mean()
+            return self.rewards[0:self._step].mean()
         return self.constant_baseline
 
     def pi_t(self, a: int):
@@ -64,6 +65,7 @@ class Agent:
         action = self.select_action()
         reward = self.bandit.pull(action)
         self.update(action, reward)
+        self._step += 1
         return action, reward
 
 
